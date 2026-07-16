@@ -122,6 +122,28 @@ class TestFromGenerator(unittest.TestCase):
         """Regression: the radiopharmaceutical lookup must not be the radionuclide table."""
         self.assertFalse(RADIOPHARMACEUTICAL_MAPPING.equals(RADIONUCLIDE_MAPPING))
 
+    def test_mii_experimental_fixes_flag(self):
+        rec = _record(**{"00101030": {"vr": "DS", "Value": [70.5]}})  # PatientWeight
+        # default OFF: legacy output unchanged (findings profile + partOf,
+        # unpinned canonicals)
+        b = _convert([rec])
+        obs = _resources(b, "Observation")[0]
+        self.assertTrue(obs.meta and obs.meta.profile)
+        self.assertTrue(obs.partOf)
+        self.assertNotIn("|", _resources(b, "ImagingStudy")[0].meta.profile[0])
+        # flag ON: vital signs unprofiled + no partOf; profiles pinned |2026.0.0
+        cfg = {"generator": {"mii": {"experimental_fixes": True}}}
+        b2 = _convert([rec], cfg)
+        obs2 = _resources(b2, "Observation")[0]
+        self.assertFalse(obs2.meta)
+        self.assertFalse(obs2.partOf)
+        self.assertTrue(
+            _resources(b2, "ImagingStudy")[0].meta.profile[0].endswith("|2026.0.0")
+        )
+        self.assertTrue(
+            _resources(b2, "Device")[0].meta.profile[0].endswith("|2026.0.0")
+        )
+
     def test_prune_empties(self):
         pruned = prune_empties(
             {"a": [], "b": {}, "c": None, "d": 0, "e": False, "f": "", "g": [None, {}, 1]}

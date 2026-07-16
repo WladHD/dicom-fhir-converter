@@ -7,7 +7,7 @@ from fhir.resources.R4B.reference import Reference
 from fhir.resources.R4B.meta import Meta
 #from pydicom import dataset
 import logging
-from dicom2fhir.dicom2fhirutils import gen_coding, SOP_CLASS_SYS, ACQUISITION_MODALITY_SYS, gen_bodysite_coding, gen_accession_identifier, gen_studyinstanceuid_identifier, dcm_coded_concept, gen_procedurecode_array, gen_started_datetime, gen_reason
+from dicom2fhir.dicom2fhirutils import gen_coding, SOP_CLASS_SYS, ACQUISITION_MODALITY_SYS, gen_bodysite_coding, gen_accession_identifier, gen_studyinstanceuid_identifier, dcm_coded_concept, gen_procedurecode_array, gen_started_datetime, gen_reason, mii_profile
 from dicom2fhir.dicom2patient import build_patient_resource
 from dicom2fhir.dicom2observation import build_observation_resources
 from dicom2fhir.dicom2device import build_device_resource
@@ -55,8 +55,9 @@ class Dicom2FHIRBundle():
 
         study_data = {}
         study_data["resource_type"] = "ImagingStudy"
-        study_data["meta"] = Meta(profile=[
-            "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/StructureDefinition/mii-pr-bildgebung-bildgebungsstudie"])
+        study_data["meta"] = Meta(profile=[mii_profile(
+            "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/StructureDefinition/mii-pr-bildgebung-bildgebungsstudie",
+            pinned=get_or(self.config, "generator.mii.experimental_fixes", False))])
         study_data["id"] = self.config['id_function']("ImagingStudy", ds)
         study_data["status"] = "available"
         

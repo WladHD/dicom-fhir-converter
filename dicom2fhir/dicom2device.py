@@ -6,6 +6,8 @@ from fhir.resources.R4B.device import Device, DeviceDeviceName
 from fhir.resources.R4B.annotation import Annotation
 from fhir.resources.R4B.device import DeviceUdiCarrier
 from fhir.resources.R4B.meta import Meta
+from dicom2fhir.dicom2fhirutils import mii_profile
+from dicom2fhir.helpers import get_or
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +37,9 @@ def build_device_resource(ds: DicomJsonProxy, config: dict) -> Device:
 
     device = Device.model_construct()
     device.meta = Meta(
-        profile=["https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/StructureDefinition/mii-pr-bildgebung-geraet"])
+        profile=[mii_profile(
+            "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/StructureDefinition/mii-pr-bildgebung-geraet",
+            pinned=get_or(config, "generator.mii.experimental_fixes", False))])
     # Resource ID
     device.id = config['id_function']('Device', ds)
 

@@ -15,6 +15,16 @@ from dicom2fhir.dicom_json_proxy import DicomJsonProxy
 
 logger = logging.getLogger(__name__)
 
+# MII Kerndatensatz "Bildgebung" package version the EXPERIMENTAL conformance
+# fixes pin Meta.profile to (config: generator.mii.experimental_fixes).
+MII_PROFILE_VERSION = "2026.0.0"
+
+
+def mii_profile(url: str, pinned: bool = False) -> str:
+    """Return an MII profile canonical, optionally version-pinned (|<version>)."""
+    return f"{url}|{MII_PROFILE_VERSION}" if pinned else url
+
+
 TERMINOLOGY_CODING_SYS = "http://terminology.hl7.org/CodeSystem/v2-0203"
 TERMINOLOGY_CODING_SYS_CODE_ACCESSION = "ACSN"
 TERMINOLOGY_CODING_SYS_CODE_MRN = "MR"

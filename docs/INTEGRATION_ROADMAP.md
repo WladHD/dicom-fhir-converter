@@ -1,7 +1,6 @@
 # Integration & MII-Conformance Roadmap (WIP)
 
-> **Draft / tracking PR.** No code in this commit — this is the plan this branch will be built against.
-> Work lands as subsequent commits here; the PR stays in *draft* until the first workstream is ready.
+> **Tracking doc.** Work lands as commits on this branch; checked items are done here.
 
 ## Goal
 
@@ -15,33 +14,31 @@ Make `dicom2fhir` able to drive a production FHIR imaging pipeline end to end:
 ## Workstreams
 
 ### FHIR correctness
-- [ ] **Patient.name** — parse VR=PN (`Family^Given^Middle^Prefix^Suffix`) into a proper `HumanName` (confirm current HEAD already covers this; add a regression test).
-- [ ] **DICOMweb Endpoint** — optional, config-gated (`dicomweb_base_url`): emit a WADO-RS `Endpoint`, deterministic id, link `ImagingStudy.endpoint`, and order the Endpoint before ImagingStudy in transaction bundles.
-- [ ] **Instance population** — make `ImagingStudy.series.instance[]` authoritative via `generator.imaging_study.add_instances` (single build path, no double construction).
-- [ ] **Serialization** — optional empty-collection pruning (drop `None` / `{}` / `[]`, e.g. `extension: []`).
+- [x] **Patient.name** — VR=PN lands as a proper `HumanName` (fixed in the json proxy; regression test in `tests/test_from_generator.py`).
+- [x] **DICOMweb Endpoint** — config-gated via `generator.endpoint.dicomweb_base_url`: WADO-RS `Endpoint` with deterministic content-addressed id, entry ordered before ImagingStudy, linked from `ImagingStudy.endpoint`. Default off.
+- [x] **Instance population** — `generator.imaging_study.add_instances` is the single build path; the key is read via a dot-path lookup and must be passed **nested** (documented + tested).
+- [x] **Serialization** — `helpers.prune_empties()` / `helpers.bundle_to_json_dict()` drop `None` / `{}` / `[]` noise.
 
-### MII *Modul Bildgebung* conformance (pin `2026.0.0`)
-- [ ] Fix `Observation.partOf`: the finding profile constrains `partOf` to a reading `Procedure`, not `ImagingStudy` — drop or retarget it.
-- [ ] Stop stamping `mii-pr-bildgebung-radiologische-beobachtung` on vital-signs (weight/height) Observations — that profile models findings. Emit plain FHIR vital-signs until the `2026.1.0` `-gewicht` / `-groesse` ImagingStudy extensions are released.
-- [ ] Pin every `Meta.profile` to `|2026.0.0`.
-- [ ] Document scope: this converter covers the **Imaging-Metadata** side (ImagingStudy / Device / series / instance). The **Befund/report** side (`DiagnosticReport` and friends) needs a radiology report and is out of scope for a header-only converter.
+### MII *Modul Bildgebung* conformance — EXPERIMENTAL, opt-in
+Behind `generator.mii.experimental_fixes` (default **off** — default output is unchanged):
+- [x] `Observation.partOf` no longer references ImagingStudy (the finding profile constrains `partOf` to a reading Procedure).
+- [x] Weight/height vital-signs Observations are emitted **unprofiled** (the `radiologische-beobachtung` findings profile was a mis-profile; `2026.0.0` has no vital-signs model — `2026.1.0`'s `-gewicht`/`-groesse` ImagingStudy extensions are the future home).
+- [x] `Meta.profile` canonicals pinned to `|2026.0.0` (ImagingStudy, Device).
+- [x] Scope: this converter covers the **Imaging-Metadata** side (ImagingStudy / Device / series / instance). The **Befund/report** side (`DiagnosticReport` and friends) needs a radiology report and is out of scope for a header-only converter.
 
 ### Known bug fixes
-- [ ] `extension_PT` loads `radionuclide_PT.json` for the radiopharmaceutical lookup (should be `radiopharmaceutical_PT.json`).
-- [ ] `add_extension_value` overwrites the `url` set by `gen_extension` (visible in the `pixelSpacing` sub-extensions).
-- [ ] `ImagingStudy.reasonCode` gating is inconsistent (guarded by `ReferencedRequestSequence` presence but reads top-level `ReasonFor…`).
-- [ ] Remove dead helpers (`calc_gender`, `calc_dob`, `get_patient_resource_ids`).
+- [x] `extension_PT` loaded `radionuclide_PT.json` for the radiopharmaceutical lookup (now `radiopharmaceutical_PT.json`).
+- [x] `gen_extension`/`add_extension_value` url mismatch at the `pixelSpacing` call sites (emitted output unchanged).
+- [x] `ImagingStudy.reasonCode` read the `Reason*` attributes from the top-level dataset while guarded on the sequence item; now read from each `ReferencedRequestSequence` item.
+- [x] Removed dead helpers (`calc_gender`, `calc_dob`, `get_patient_resource_ids`).
+- [x] `Extension` construction: `Extension(url=...)` directly — newer `fhir_core` releases validate required fields at construction time.
 
 ### Packaging & robustness
 - [ ] Opt-in lenient-parse preset (pydicom validation posture) for trusted internal data.
 - [ ] Optional DB source adapter as an extra (`dicom2fhir[postgres]`): rehydrated DICOM-JSON rows → `AsyncGenerator[dict]`.
-- [ ] Refresh `dist/` artefacts; align `requirements.txt` with `pyproject.toml`.
-
-### Efficiency
-- [ ] True single-pass streaming (cursor → bundle) to cap memory on large studies.
-- [ ] Single serialization pass (`model_dump(exclude_none=True)`) instead of serialize → parse → rebuild → serialize.
+- [x] `requirements.txt` aligned with `pyproject.toml`.
+- [ ] Refresh `dist/` artefacts.
 
 ## Testing
-- [ ] Golden-file tests: DICOM-JSON in → expected bundle out.
-- [ ] Per-modality extension coverage.
-- [ ] MII validation against `kerndatensatz-bildgebung` `2026.0.0`.
+- [x] `tests/test_from_generator.py`: DICOM-JSON input path end to end — PN regression, sha256 id convention, device performer, Endpoint gating + ordering, reasonCode, nested `add_instances`, PT mapping, prune, MII experimental flag.
+- [ ] MII validation against `kerndatensatz-bildgebung` `2026.0.0` (external validator).

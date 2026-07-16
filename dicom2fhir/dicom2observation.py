@@ -11,16 +11,25 @@ from fhir.resources.R4B.reference import Reference
 from fhir.resources.R4B.meta import Meta
 from dicom2fhir.dicom2fhirutils import gen_started_datetime
 from dicom2fhir.dicom_json_proxy import DicomJsonProxy
+from dicom2fhir.helpers import get_or
 
 logger = logging.getLogger(__name__)
 
 def build_observation_resources(ds: DicomJsonProxy, patient: Patient, study: ImagingStudy, config: dict) -> List[Observation]:
     observations = []
-    
+
+    # EXPERIMENTAL MII conformance fixes (generator.mii.experimental_fixes):
+    # the mii-pr-bildgebung-radiologische-beobachtung profile models radiological
+    # FINDINGS - stamping it on weight/height vital signs is a mis-profile, and
+    # its partOf is constrained to a reading Procedure (a partOf -> ImagingStudy
+    # reference fails validation). With the flag on, emit plain FHIR vital-signs
+    # Observations: no MII profile, no partOf.
+    mii_experimental = get_or(config, "generator.mii.experimental_fixes", False)
+
     def create_obs(code: str, display: str, value: float, unit: str, system: str, code_unit: str) -> Observation:
         return Observation.model_construct(
             id=config['id_function']('Observation', ds, extra=code),
-            meta = Meta(profile=["https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/StructureDefinition/mii-pr-bildgebung-radiologische-beobachtung"]),
+            meta = None if mii_experimental else Meta(profile=["https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/StructureDefinition/mii-pr-bildgebung-radiologische-beobachtung"]),
             status="final",
             category=[CodeableConcept.model_construct(
                 coding=[Coding.model_construct(system="http://terminology.hl7.org/CodeSystem/observation-category", code="vital-signs")]
@@ -30,7 +39,7 @@ def build_observation_resources(ds: DicomJsonProxy, patient: Patient, study: Ima
                 text=display
             ),
             subject=Reference.model_construct(reference=f"Patient/{patient.id}") if patient else None,
-            partOf=[Reference.model_construct(reference=f"ImagingStudy/{study.id}")] if study else [],
+            partOf=[] if mii_experimental else ([Reference.model_construct(reference=f"ImagingStudy/{study.id}")] if study else []),
             effectiveDateTime=gen_started_datetime(ds.StudyDate, ds.StudyTime, config["dicom_timezone"]),
             valueQuantity=Quantity.model_construct(value=value, unit=unit, system=system, code=code_unit)
         )
