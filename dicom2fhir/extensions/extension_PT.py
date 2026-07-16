@@ -10,7 +10,7 @@ RADIONUCLIDE_MAPPING = pd.DataFrame(json.loads(
 RADIOPHARMACEUTICAL_MAPPING_PATH = Path(
     __file__).parent.parent / "resources" / "terminologies" / "radiopharmaceutical_PT.json"
 RADIOPHARMACEUTICAL_MAPPING = pd.DataFrame(json.loads(
-    RADIONUCLIDE_MAPPING_PATH.read_text(encoding="utf-8")))
+    RADIOPHARMACEUTICAL_MAPPING_PATH.read_text(encoding="utf-8")))
 UNITS_CSV_PATH = Path(__file__).parent.parent / \
     "resources" / "terminologies" / "units.csv"
 UNITS_MAPPING = pd.read_csv(UNITS_CSV_PATH, encoding="utf-8")
