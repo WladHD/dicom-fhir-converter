@@ -102,7 +102,7 @@ class Dicom2FHIRBundle():
         
         study_extensions = []
         # reason extension
-        e_reason = extension_reason.create_extension(ds)
+        e_reason = extension_reason.create_extension(ds, self.config)
         if e_reason is not None:
             study_extensions.append(e_reason)
 

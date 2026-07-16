@@ -1,0 +1,403 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "mii-ex-bildgebung-instanz-details",
+  "extension": [
+    {
+      "url": "https://www.medizininformatik-initiative.de/fhir/modul-meta/StructureDefinition/mii-ex-meta-license-codeable",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "code": "CC-BY-4.0",
+            "system": "http://hl7.org/fhir/spdx-license",
+            "display": "Creative Commons Attribution 4.0 International"
+          }
+        ]
+      }
+    }
+  ],
+  "url": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/StructureDefinition/mii-ex-bildgebung-instanz-details",
+  "version": "2026.0.0",
+  "name": "MII_EX_Bildgebung_Instanz_Details",
+  "_name": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/translation",
+        "extension": [
+          {
+            "url": "lang",
+            "valueCode": "en-US"
+          },
+          {
+            "url": "content",
+            "valueString": "MII_EX_Instance_Details"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "MII EX Bildgebung Instanzdetails",
+  "_title": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/translation",
+        "extension": [
+          {
+            "url": "lang",
+            "valueCode": "en-US"
+          },
+          {
+            "url": "content",
+            "valueString": "MII EX Instance Details"
+          }
+        ]
+      }
+    ]
+  },
+  "status": "active",
+  "experimental": false,
+  "publisher": "Medizininformatik Initiative",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://www.medizininformatik-initiative.de"
+        }
+      ]
+    }
+  ],
+  "description": "Die Extension ermöglicht es, Informationen zur ausgewählten Serie auf Instanz-Ebene anzugeben.",
+  "_description": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/translation",
+        "extension": [
+          {
+            "url": "lang",
+            "valueCode": "en-US"
+          },
+          {
+            "url": "content",
+            "valueString": "The extension allows specifying information about the selected series at the instance level."
+          }
+        ]
+      }
+    ]
+  },
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "ImagingStudy.series.instance"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension.extension:pixelSpacingX",
+        "path": "Extension.extension",
+        "sliceName": "pixelSpacingX",
+        "min": 0,
+        "max": "1",
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:pixelSpacingX.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingX.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "pixelSpacingX"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingX.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "Quantity",
+            "profile": [
+              "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:pixelSpacingX.value[x].unit",
+        "path": "Extension.extension.value[x].unit",
+        "patternString": "millimeter"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingX.value[x].system",
+        "path": "Extension.extension.value[x].system",
+        "patternUri": "http://unitsofmeasure.org"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingX.value[x].code",
+        "path": "Extension.extension.value[x].code",
+        "patternCode": "mm"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingY",
+        "path": "Extension.extension",
+        "sliceName": "pixelSpacingY",
+        "min": 0,
+        "max": "1",
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:pixelSpacingY.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingY.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "pixelSpacingY"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingY.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "Quantity",
+            "profile": [
+              "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:pixelSpacingY.value[x].unit",
+        "path": "Extension.extension.value[x].unit",
+        "patternString": "millimeter"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingY.value[x].system",
+        "path": "Extension.extension.value[x].system",
+        "patternUri": "http://unitsofmeasure.org"
+      },
+      {
+        "id": "Extension.extension:pixelSpacingY.value[x].code",
+        "path": "Extension.extension.value[x].code",
+        "patternCode": "mm"
+      },
+      {
+        "id": "Extension.extension:sliceThickness",
+        "path": "Extension.extension",
+        "sliceName": "sliceThickness",
+        "min": 0,
+        "max": "1",
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:sliceThickness.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:sliceThickness.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "sliceThickness"
+      },
+      {
+        "id": "Extension.extension:sliceThickness.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "Quantity",
+            "profile": [
+              "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:sliceThickness.value[x].unit",
+        "path": "Extension.extension.value[x].unit",
+        "patternString": "millimeter"
+      },
+      {
+        "id": "Extension.extension:sliceThickness.value[x].system",
+        "path": "Extension.extension.value[x].system",
+        "patternUri": "http://unitsofmeasure.org"
+      },
+      {
+        "id": "Extension.extension:sliceThickness.value[x].code",
+        "path": "Extension.extension.value[x].code",
+        "patternCode": "mm"
+      },
+      {
+        "id": "Extension.extension:imageType",
+        "path": "Extension.extension",
+        "sliceName": "imageType",
+        "min": 0,
+        "max": "*",
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:imageType.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:imageType.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "imageType"
+      },
+      {
+        "id": "Extension.extension:imageType.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding",
+        "path": "Extension.extension.value[x].coding",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "$this"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding:pixelData",
+        "path": "Extension.extension.value[x].coding",
+        "sliceName": "pixelData",
+        "min": 0,
+        "max": "*",
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/ValueSet/mii-vs-bildgebung-instance-image-type-pixel-data"
+        }
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding:patientExamination",
+        "path": "Extension.extension.value[x].coding",
+        "sliceName": "patientExamination",
+        "min": 0,
+        "max": "*",
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/ValueSet/mii-vs-bildgebung-instance-image-type-patient-examination"
+        }
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding:modalityCT",
+        "path": "Extension.extension.value[x].coding",
+        "sliceName": "modalityCT",
+        "min": 0,
+        "max": "*",
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/ValueSet/mii-vs-bildgebung-instance-image-type-ct"
+        }
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding:modalityMR",
+        "path": "Extension.extension.value[x].coding",
+        "sliceName": "modalityMR",
+        "min": 0,
+        "max": "*",
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/ValueSet/mii-vs-bildgebung-instance-image-type-mr"
+        }
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding:modalityNM",
+        "path": "Extension.extension.value[x].coding",
+        "sliceName": "modalityNM",
+        "min": 0,
+        "max": "*",
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/ValueSet/mii-vs-bildgebung-instance-image-type-nm"
+        }
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding:modalityUS",
+        "path": "Extension.extension.value[x].coding",
+        "sliceName": "modalityUS",
+        "min": 0,
+        "max": "*",
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/ValueSet/mii-vs-bildgebung-instance-image-type-us"
+        }
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding:implementationNM",
+        "path": "Extension.extension.value[x].coding",
+        "sliceName": "implementationNM",
+        "min": 0,
+        "max": "*",
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/ValueSet/mii-vs-bildgebung-instance-image-type-nm-implementation"
+        }
+      },
+      {
+        "id": "Extension.extension:imageType.value[x].coding:implementationUS",
+        "path": "Extension.extension.value[x].coding",
+        "sliceName": "implementationUS",
+        "min": 0,
+        "max": "*",
+        "binding": {
+          "strength": "required",
+          "valueSet": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/ValueSet/mii-vs-bildgebung-instance-image-type-us-implemantation"
+        }
+      },
+      {
+        "id": "Extension.extension:burnedInAnnotation",
+        "path": "Extension.extension",
+        "sliceName": "burnedInAnnotation",
+        "min": 0,
+        "max": "1",
+        "mustSupport": true
+      },
+      {
+        "id": "Extension.extension:burnedInAnnotation.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:burnedInAnnotation.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "burnedInAnnotation"
+      },
+      {
+        "id": "Extension.extension:burnedInAnnotation.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ]
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "https://www.medizininformatik-initiative.de/fhir/ext/modul-bildgebung/StructureDefinition/mii-ex-bildgebung-instanz-details"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "max": "0"
+      }
+    ]
+  }
+}
