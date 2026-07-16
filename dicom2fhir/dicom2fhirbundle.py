@@ -79,19 +79,24 @@ class Dicom2FHIRBundle():
         if ds.non_empty("StudyDate") and ds.non_empty("StudyTime"):
             study_data["started"] = gen_started_datetime(str(ds.StudyDate), str(ds.StudyTime), self.config["dicom_timezone"])
 
-        # reason codes
+        # reason codes - read from each ReferencedRequestSequence ITEM (the
+        # Reason* attributes live inside the sequence items, not at top level)
         if ds.non_empty("ReferencedRequestSequence"):
+            reason_codes = []
             for seq in ds.ReferencedRequestSequence:
 
                 reason = None
-                reasonStr = None 
+                reasonStr = None
 
                 if seq.non_empty("ReasonForRequestedProcedureCodeSequence"):
-                    reason = dcm_coded_concept(ds.ReasonForRequestedProcedureCodeSequence)
+                    reason = dcm_coded_concept(seq.ReasonForRequestedProcedureCodeSequence)
                 if seq.non_empty("ReasonForTheRequestedProcedure"):
-                    reasonStr = str(ds.ReasonForTheRequestedProcedure)
-                if reason is not None and reasonStr is not None:
-                    study_data["reasonCode"] = gen_reason(reason, reasonStr)
+                    reasonStr = str(seq.ReasonForTheRequestedProcedure)
+                rc = gen_reason(reason, reasonStr)
+                if rc:
+                    reason_codes.extend(rc)
+            if reason_codes:
+                study_data["reasonCode"] = reason_codes
         
         study_extensions = []
         # reason extension

@@ -14,7 +14,7 @@ def create_extension(ds):
         pixelSpacingY = pixelspacings[1]
 
         # pixelSpacing(x)
-        extension_pixelSpacingX = gen_extension(url="pixelSpacing(x)")
+        extension_pixelSpacingX = gen_extension(url="pixelSpacingX")
         if add_extension_value(
             e=extension_pixelSpacingX,
             url="pixelSpacingX",
@@ -27,7 +27,7 @@ def create_extension(ds):
 
         # pixelSpacing(y)
         extension_pixelSpacingY = gen_extension(
-            url="pixelSpacing(y)"
+            url="pixelSpacingY"
         )
         if add_extension_value(
             e=extension_pixelSpacingY,

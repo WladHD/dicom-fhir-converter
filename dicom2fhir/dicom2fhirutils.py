@@ -5,7 +5,6 @@ from dateutil import tz as dateutil_tz
 from fhir.resources.R4B import identifier
 from fhir.resources.R4B import codeableconcept
 from fhir.resources.R4B import coding
-from fhir.resources.R4B import fhirtypes
 from fhir.resources.R4B import reference
 from fhir.resources.R4B import extension
 from fhir.resources.R4B import quantity
@@ -77,53 +76,6 @@ def gen_studyinstanceuid_identifier(id):
     idf.system = "urn:dicom:uid"
     idf.value = "urn:oid:" + id
     return idf
-
-def get_patient_resource_ids(PatientID, IssuerOfPatientID):
-    idf = identifier.Identifier.model_construct()
-    idf.use = "usual"
-    idf.value = str(PatientID)
-
-    idf.type = codeableconcept.CodeableConcept.model_construct()
-    idf.type.coding = []
-    id_coding = coding.Coding.model_construct()
-    id_coding.system = TERMINOLOGY_CODING_SYS
-    id_coding.code = TERMINOLOGY_CODING_SYS_CODE_MRN
-    idf.type.coding.append(id_coding)
-
-    if IssuerOfPatientID is not None:
-        idf.assigner = reference.Reference.model_construct()
-        idf.assigner.display = str(IssuerOfPatientID)
-
-    return idf
-
-def calc_gender(gender: str | None):
-    if gender is None:
-        return "unknown"
-    if not gender:
-        return "unknown"
-    if gender.upper().lower() == "f":
-        return "female"
-    if gender.upper().lower() == "m":
-        return "male"
-    if gender.upper().lower() == "o":
-        return "other"
-
-    return "unknown"
-
-def calc_dob(dicom_dob: str):
-    if dicom_dob == '':
-        return None
-
-    try:
-        dob = datetime.strptime(dicom_dob, '%Y%m%d')
-        fhir_dob = fhirtypes.Date(
-            dob.year,
-            dob.month,
-            dob.day
-        )
-    except Exception:
-        return None
-    return fhir_dob
 
 def gen_procedurecode_array(procedures):
     if procedures is None:
@@ -282,9 +234,9 @@ def gen_extension(url):
     Returns:
         FHIR Extension object.
     """
-    e = extension.Extension()
-    e.url = url
-    return e
+    # Construct with url directly: Extension.url is a required field and newer
+    # fhir_core releases validate at construction time (bare Extension() raises).
+    return extension.Extension(url=url)
 
 
 def add_extension_value(e, url, value, system, unit, type, display=None, text=None):
@@ -320,20 +272,17 @@ def add_extension_value(e, url, value, system, unit, type, display=None, text=No
             logging.warning(f"Skipping invalid Quantity.value: {value!r}. Adding as extension with valueString.")
             sub_exts = []
 
-            ext_value = extension.Extension()
-            ext_value.url = "Value.quantity.value"
+            ext_value = extension.Extension(url="Value.quantity.value")
             ext_value.valueString = str(value)
             sub_exts.append(ext_value)
 
             if unit:
-                ext_unit = extension.Extension()
-                ext_unit.url = "Value.quantity.unit"
+                ext_unit = extension.Extension(url="Value.quantity.unit")
                 ext_unit.valueString = unit
                 sub_exts.append(ext_unit)
 
             if system:
-                ext_sys = extension.Extension()
-                ext_sys.url = "Value.quantity.system"
+                ext_sys = extension.Extension(url="Value.quantity.system")
                 ext_sys.valueString = system
                 sub_exts.append(ext_sys)
 
