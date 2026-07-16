@@ -11,6 +11,7 @@ from dicom2fhir.dicom2fhirutils import gen_coding, SOP_CLASS_SYS, ACQUISITION_MO
 from dicom2fhir.dicom2patient import build_patient_resource
 from dicom2fhir.dicom2observation import build_observation_resources
 from dicom2fhir.dicom2device import build_device_resource
+from dicom2fhir.dicom2endpoint import build_endpoint_resource
 from dicom2fhir.helpers import get_or
 from dicom2fhir.dicom_json_proxy import DicomJsonProxy
 # extensions
@@ -306,15 +307,26 @@ class Dicom2FHIRBundle():
 
         # Build the ImagingStudy resource
         _study = self._build_imaging_study()
-    
+
+        entries = [
+            _to_entry(_study),
+            _to_entry(self.pat),
+            _to_entry(self.device)
+        ] + [_to_entry(o) for o in self.obs]
+
+        # Optional WADO-RS Endpoint (config: generator.endpoint.dicomweb_base_url).
+        # Inserted BEFORE the ImagingStudy so transaction servers that validate
+        # references in document order can resolve ImagingStudy.endpoint.
+        dicomweb_base_url = get_or(self.config, "generator.endpoint.dicomweb_base_url", None)
+        if dicomweb_base_url:
+            _endpoint = build_endpoint_resource(dicomweb_base_url)
+            _study.endpoint = [Reference.model_construct(reference=f"Endpoint/{_endpoint.id}")]
+            entries.insert(0, _to_entry(_endpoint))
+
         # wrap entries in a transaction Bundle and return
         return bundle.Bundle.model_validate({
             'resourceType': 'Bundle',
             'type': "transaction",
             'id': str(uuid.uuid4()),
-            'entry': [
-                _to_entry(_study),
-                _to_entry(self.pat),
-                _to_entry(self.device)
-            ] + [_to_entry(o) for o in self.obs]
+            'entry': entries
         })
