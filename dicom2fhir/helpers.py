@@ -84,3 +84,39 @@ def read_dicom_proxy(file_path, stop_before_pixels=True, force=True):
 
     # Wrap in proxy
     return DicomJsonProxy(dicom_json)
+
+
+def prune_empties(value):
+    """
+    Recursively drop None, empty dicts and empty lists from a JSON-like
+    structure. fhir.resources serializes optional collections as noise
+    (e.g. ``"extension": []``); pruning yields clean output for storage.
+    Keeps falsy-but-meaningful values (0, False, "").
+    """
+    if isinstance(value, dict):
+        out = {}
+        for k, v in value.items():
+            pv = prune_empties(v)
+            if pv is None or pv == {} or pv == []:
+                continue
+            out[k] = pv
+        return out
+    if isinstance(value, list):
+        out = []
+        for v in value:
+            pv = prune_empties(v)
+            if pv is None or pv == {} or pv == []:
+                continue
+            out.append(pv)
+        return out
+    return value
+
+
+def bundle_to_json_dict(resource, prune: bool = True) -> dict:
+    """
+    Serialize a fhir.resources resource (e.g. the Bundle returned by
+    from_generator) to a plain JSON dict, pruning empty nodes by default.
+    """
+    import json
+    d = json.loads(resource.model_dump_json())
+    return prune_empties(d) if prune else d
