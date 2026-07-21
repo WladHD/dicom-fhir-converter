@@ -5,3 +5,7 @@ build
 venv
 __pycache__
 .idea
+# Build artifacts - published via CI releases/packages, never committed.
+dist/
+build/
+*.egg-info/
