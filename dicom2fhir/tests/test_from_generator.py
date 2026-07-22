@@ -122,6 +122,22 @@ class TestFromGenerator(unittest.TestCase):
         """Regression: the radiopharmaceutical lookup must not be the radionuclide table."""
         self.assertFalse(RADIOPHARMACEUTICAL_MAPPING.equals(RADIONUCLIDE_MAPPING))
 
+    def test_duplicate_sop_instance_does_not_crash(self):
+        """Duplicate SOPInstanceUID input: first wins, no exception (the old
+        code called .as_json() on a plain dict here and crashed)."""
+        b = _convert([_record(), _record()])
+        study = _resources(b, "ImagingStudy")[0]
+        self.assertEqual(study.numberOfInstances, 1)
+
+    def test_from_directory_accepts_iterable_of_dicts(self):
+        """The iterable branch used to return an un-awaited coroutine fed with
+        a plain list; it must behave like from_generator."""
+        from dicom2fhir.dicom2fhir import from_directory
+
+        b = asyncio.run(from_directory([_record()], config={"dicom_timezone": "UTC"}))
+        self.assertEqual(len(_resources(b, "ImagingStudy")), 1)
+        self.assertEqual(len(_resources(b, "Patient")), 1)
+
     def test_prune_empties(self):
         pruned = prune_empties(
             {"a": [], "b": {}, "c": None, "d": 0, "e": False, "f": "", "g": [None, {}, 1]}
