@@ -39,14 +39,14 @@ def build_observation_resources(ds: DicomJsonProxy, patient: Patient, study: Ima
         try:
             weight = float(ds.PatientWeight)
             observations.append(create_obs("29463-7", "Body Weight", weight, "kg", "http://unitsofmeasure.org", "kg"))
-        except:
+        except (TypeError, ValueError):
             logger.warning(f"Failed to extract PatientWeight: {ds.PatientWeight}")
 
     if "PatientSize" in ds and ds.PatientSize is not None:
         try:
             height = float(ds.PatientSize)
             observations.append(create_obs("8302-2", "Body Height", height, "m", "http://unitsofmeasure.org", "m"))
-        except:
+        except (TypeError, ValueError):
             logger.warning(f"Failed to extract PatientSize: {ds.PatientSize}")
 
     return observations

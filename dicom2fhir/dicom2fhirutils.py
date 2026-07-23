@@ -52,7 +52,7 @@ def _coding(d: dict) -> coding.Coding | None:
     if "display" in d:
         c.display = d["display"]
     if "version" in d:
-        c.display = d["version"]
+        c.version = d["version"]
     if "userSelected" in d:
         c.userSelected = d["userSelected"]
     

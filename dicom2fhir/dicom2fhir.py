@@ -71,44 +71,49 @@ async def _create_bundle(instances: AsyncGenerator[DicomJsonProxy, None], config
 
 async def from_directory(dcms: StrPath, config: dict = {}) -> bundle.Bundle:
     """
-    Process DICOM files into an ImagingStudy FHIR resource.
-    
-    :param dcms: A directory containing DICOM files.
-    :return: ImagingStudy resource.
-    """
+    Process a directory of DICOM files (or an iterable of DICOM-JSON dicts)
+    into a FHIR transaction Bundle.
 
-    def _wrap(instances: Iterable[dataset.Dataset]):
-        for instance in instances:
-            yield DicomJsonProxy(instance.to_json_dict())
+    :param dcms: A directory containing DICOM files, or an iterable of
+        DICOM-JSON dicts (PS3.18 native model).
+    :return: FHIR transaction Bundle.
+    """
 
     # use default id function for FHIR resource id generation
     if 'id_function' not in config:
         config['id_function'] = helpers.default_id_function()
 
     # parse directory of DICOM files
-    if isinstance(dcms, StrPath):
+    if isinstance(dcms, (str, PathLike)):
         if not Path(dcms).is_dir():
             raise ValueError(f"Expected a directory, got: {dcms}")
         dicom_json_proxies = _parse_directory(dcms, config)
         return await _create_bundle(dicom_json_proxies, config)
-    # use iterable of DICOM JSON Proxies
+    # use iterable of DICOM JSON dicts
     else:
         # guard against non-iterable or non-dict types
         if not isinstance(dcms, Iterable):
             raise TypeError("Expected an iterable of dicts. Got: {}".format(type(dcms)))
-        for d in dcms:
+        items = list(dcms)
+        for d in items:
             if not isinstance(d, dict):
                 raise TypeError("Expected a dict. Got: {}".format(type(d)))
 
-        dicom_json_proxies = [DicomJsonProxy(d) for d in dcms]
-        return _create_bundle(dicom_json_proxies, config)
+        async def _aiter() -> AsyncGenerator[DicomJsonProxy, None]:
+            for d in items:
+                yield DicomJsonProxy(d)
+
+        # _create_bundle consumes an ASYNC generator and must be awaited -
+        # the previous implementation returned an un-awaited coroutine fed
+        # with a plain list.
+        return await _create_bundle(_aiter(), config)
 
 async def from_generator(dcms: AsyncGenerator[dict, None], config: dict = {}) -> bundle.Bundle:
     """
-    Process DICOM files or datasets into an ImagingStudy FHIR resource.
-    
-    :param dcms: AsyncGenerator of DICOM JSON dicts.
-    :return: ImagingStudy resource.
+    Process a stream of DICOM-JSON dicts into a FHIR transaction Bundle.
+
+    :param dcms: AsyncGenerator of DICOM JSON dicts (PS3.18 native model).
+    :return: FHIR transaction Bundle.
     """
 
     # use default id function for FHIR resource id generation
