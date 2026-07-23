@@ -28,9 +28,14 @@ def dicom_name_to_fhir(name: str) -> HumanName:
     if pname is None:
         return HumanName.model_construct()
 
+    # Every component is omitted rather than emitted empty: a malformed or empty
+    # PatientName ('', '^^^^', '^Given') would otherwise produce family="" or
+    # given=[], which are not meaningful values and survive a None/{}/[]-based
+    # prune. An absent component is the honest representation of "not supplied".
+    given = [n for n in [pname.given_name, pname.middle_name] if n]
     return HumanName.model_construct(
-        family      = pname.family_name,
-        given       = [n for n in [pname.given_name, pname.middle_name] if n],
+        family      = pname.family_name or None,
+        given       = given or None,
         prefix      = [pname.name_prefix] if pname.name_prefix else None,
         suffix      = [pname.name_suffix] if pname.name_suffix else None,
     )

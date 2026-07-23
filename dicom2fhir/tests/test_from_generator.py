@@ -138,6 +138,28 @@ class TestFromGenerator(unittest.TestCase):
         self.assertEqual(len(_resources(b, "ImagingStudy")), 1)
         self.assertEqual(len(_resources(b, "Patient")), 1)
 
+    def test_malformed_patient_name_omits_empty_components(self):
+        """A malformed/empty PatientName must omit components, not emit them
+        empty: family="" and given=[] are not meaningful values, and an empty
+        string survives a None/{}/[]-based prune."""
+        from dicom2fhir.dicom2patient import dicom_name_to_fhir
+
+        for raw in ("", "^^^^"):
+            self.assertEqual(
+                dicom_name_to_fhir(raw).model_dump(exclude_none=True), {},
+                f"expected no components for PatientName {raw!r}",
+            )
+
+        # Partial names keep what is present and drop what is not.
+        self.assertEqual(
+            dicom_name_to_fhir("^Given").model_dump(exclude_none=True),
+            {"given": ["Given"]},
+        )
+        self.assertEqual(
+            dicom_name_to_fhir("Doe^John^Q^Dr^Jr").model_dump(exclude_none=True),
+            {"family": "Doe", "given": ["John", "Q"], "prefix": ["Dr"], "suffix": ["Jr"]},
+        )
+
     def test_prune_empties(self):
         pruned = prune_empties(
             {"a": [], "b": {}, "c": None, "d": 0, "e": False, "f": "", "g": [None, {}, 1]}
